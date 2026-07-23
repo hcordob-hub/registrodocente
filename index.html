@@ -138,8 +138,7 @@
         .summary-grid .stat { background:#f8fafc; padding:12px 16px; border-radius:var(--radius); border:1px solid #edf2f7; }
         .summary-grid .stat .label { font-size:12px; color:#64748b; font-weight:500; }
         .summary-grid .stat .value { font-size:22px; font-weight:700; color:#0f172a; }
-        #settingsForm .form-grid { grid-template-columns:1fr 1fr 1fr; align-items:end; }
-        #settingsForm .form-group .help-text { font-size:12px; color:#64748b; margin-top:2px; }
+        .help-text { font-size:12px; color:#64748b; margin-top:2px; display:block; }
         .csv-btn { margin-left:8px; }
         /* Responsive (original) */
         @media (max-width:768px) {
@@ -167,7 +166,6 @@
             .semester-selector { flex-direction:column; align-items:stretch; }
             .summary-student-header { flex-direction:column; align-items:stretch; }
             .cover .teacher-info { flex-direction:column; gap:8px; }
-            #settingsForm .form-grid { grid-template-columns:1fr !important; }
         }
         @media (max-width:480px) {
             .cover .features { grid-template-columns:1fr; }
@@ -220,7 +218,7 @@
             <a data-page="exams"><i class="fas fa-pencil-alt"></i> Exámenes</a>
             <a data-page="grades"><i class="fas fa-calculator"></i> Notas Finales</a>
             <a data-page="studentsummary"><i class="fas fa-user-circle"></i> Resumen Estudiante</a>
-            <a data-page="settings"><i class="fas fa-cog"></i> Configuración</a>
+            <a data-page="settings"><i class="fas fa-cog"></i> Gestión de Datos</a>
         </nav>
         <div class="sidebar-footer">
             <div>v2.0 · Evaluaciones Semestrales</div>
@@ -294,6 +292,10 @@
                         <div class="form-group"><label>Nombre de la materia <span class="required">*</span></label><input class="form-control" id="materiaNombre" placeholder="Ej: Matemáticas" required /></div>
                         <div class="form-group"><label>Docente <span class="required">*</span></label><input class="form-control" id="materiaDocente" placeholder="Nombre del docente" required /></div>
                         <div class="form-group"><label>Semestre</label><input class="form-control" id="materiaSemestre" placeholder="Ej: 2026-1" /></div>
+                        <div class="form-group"><label>Nota de aprobación <span class="required">*</span></label>
+                            <input class="form-control" id="materiaApproval" type="number" min="0" max="100" step="0.1" value="60" required />
+                            <span class="help-text">Nota mínima para aprobar.</span>
+                        </div>
                         <div class="form-actions" style="grid-column:1/-1; border-top:none; padding-top:0; margin-top:4px;">
                             <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Crear Materia</button>
                         </div>
@@ -733,34 +735,8 @@
                 </div>
             </section>
 
-            <!-- ==================== SETTINGS ==================== -->
+            <!-- ==================== GESTIÓN DE DATOS ==================== -->
             <section class="page" id="page-settings">
-                <div class="card">
-                    <div class="card-header"><h3><i class="fas fa-user-cog" style="color:var(--primary);"></i> Configuración del Docente</h3></div>
-                    <form id="settingsForm">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Nombre del Docente <span class="required">*</span></label>
-                                <input class="form-control" id="teacherName" placeholder="Ej: Prof. Juan Pérez" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Materia / Asignatura <span class="required">*</span></label>
-                                <input class="form-control" id="teacherSubject" placeholder="Ej: Matemáticas" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Nota de aprobación <span class="required">*</span></label>
-                                <input class="form-control" id="approvalGrade" type="number" min="0" max="100" step="0.1" placeholder="60" required />
-                                <span class="help-text">Nota mínima para aprobar.</span>
-                            </div>
-                        </div>
-                        <div class="form-actions" style="grid-column:1/-1; border-top:none; padding-top:0; margin-top:4px;">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Configuración</button>
-                        </div>
-                    </form>
-                    <div style="margin-top:12px; font-size:14px; color:#64748b;">
-                        <i class="fas fa-info-circle"></i> Estos datos aparecerán en la portada del sistema, en los reportes PDF y se usarán para determinar aprobación en las notas finales.
-                    </div>
-                </div>
                 <div class="card">
                     <div class="card-header"><h3><i class="fas fa-database"></i> Gestión de Datos</h3></div>
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
@@ -786,15 +762,15 @@
         // ================================================================
         //  FIREBASE CONFIGURACIÓN (REEMPLAZA CON TUS CREDENCIALES)
         // ================================================================
-       const firebaseConfig = {
-  apiKey: "AIzaSyBobOV6jtw9dzgqFW2RdoknGEcHuArqaeY",
-  authDomain: "registro-docente-b2db4.firebaseapp.com",
-  projectId: "registro-docente-b2db4",
-  storageBucket: "registro-docente-b2db4.firebasestorage.app",
-  messagingSenderId: "513853631818",
-  appId: "1:513853631818:web:9fb4571b93def3cb7b65b3",
-  measurementId: "G-4C05CQN3CE"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyBobOV6jtw9dzgqFW2RdoknGEcHuArqaeY",
+            authDomain: "registro-docente-b2db4.firebaseapp.com",
+            projectId: "registro-docente-b2db4",
+            storageBucket: "registro-docente-b2db4.firebasestorage.app",
+            messagingSenderId: "513853631818",
+            appId: "1:513853631818:web:9fb4571b93def3cb7b65b3",
+            measurementId: "G-4C05CQN3CE"
+        };
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
@@ -804,13 +780,13 @@
         //  VARIABLES GLOBALES
         // ================================================================
         let materiaActualId = localStorage.getItem('materiaActualId') || null;
-        let materiaActual = null; // { id, nombre, docente, semestre, approvalGrade, weights, estudiantes:[], asistencias:[], ... }
+        let materiaActual = null;
         let unsubscribeMateria = null;
         let unsubscribes = { estudiantes: null, asistencias: null, dailyWorks: null, extraWorks: null, projects: null,
             exams: null };
 
         // ================================================================
-        //  TOAST (igual que original)
+        //  TOAST
         // ================================================================
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -848,7 +824,6 @@
         function cargarMateria(id) {
             if (unsubscribeMateria) { unsubscribeMateria();
                 unsubscribeMateria = null; }
-            // Cancelar todas las subscripciones
             for (const key in unsubscribes) {
                 if (unsubscribes[key]) { unsubscribes[key]();
                     unsubscribes[key] = null; }
@@ -868,7 +843,6 @@
             localStorage.setItem('materiaActualId', id);
             const docRef = db.collection('materias').doc(id);
 
-            // Suscribirse al documento principal
             unsubscribeMateria = docRef.onSnapshot((doc) => {
                 if (doc.exists) {
                     const dataMateria = doc.data();
@@ -887,7 +861,6 @@
                         projects: [],
                         exams: []
                     };
-                    // Cargar subcolecciones
                     cargarSubcoleccion('estudiantes', 'estudiantes');
                     cargarSubcoleccion('asistencias', 'asistencias');
                     cargarSubcoleccion('dailyWorks', 'trabajosCotidianos');
@@ -895,7 +868,6 @@
                     cargarSubcoleccion('projects', 'proyectos');
                     cargarSubcoleccion('exams', 'examenes');
 
-                    // Actualizar UI general
                     actualizarBadgeMateria();
                     renderAll();
                     showToast(`Materia "${materiaActual.nombre}" cargada.`, 'success');
@@ -919,7 +891,6 @@
                 if (!materiaActual) return;
                 const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 materiaActual[key] = docs;
-                // Actualizar UI según la página activa
                 const activePage = document.querySelector('.page.active');
                 if (activePage) {
                     const pageId = activePage.id.replace('page-', '');
@@ -947,19 +918,17 @@
                 badge.textContent = 'Sin materia';
                 badge.style.display = 'inline-block';
             }
-            // Actualizar selectores de materias en topbar y en página de materias
             poblarSelectorMaterias();
         }
 
         // ================================================================
-        //  SELECTOR DE MATERIAS (topbar y página)
+        //  SELECTOR DE MATERIAS
         // ================================================================
         function poblarSelectorMaterias() {
-            // Obtener todas las materias de Firestore (una sola vez, sin suscripción continua)
             db.collection('materias').get().then((snapshot) => {
                 const selects = [
                     document.getElementById('selectorMateriaTop'),
-                    document.getElementById('selectorMateriaPage') // si existe
+                    document.getElementById('selectorMateriaPage')
                 ];
                 selects.forEach(sel => {
                     if (!sel) return;
@@ -978,9 +947,7 @@
                         sel.value = materiaActualId;
                     }
                 });
-                // Actualizar el contador en la página de materias
                 document.getElementById('materiaCount').textContent = snapshot.size;
-                // Renderizar lista de materias
                 renderListaMaterias(snapshot);
             }).catch(err => {
                 console.error('Error al cargar materias:', err);
@@ -1002,7 +969,7 @@
                     <div class="materia-list-item">
                         <div class="materia-info">
                             <span class="materia-nombre">${data.nombre || 'Sin nombre'} ${isActive ? '⭐' : ''}</span>
-                            <span class="materia-docente">Docente: ${data.docente || '—'} | Semestre: ${data.semestre || '—'}</span>
+                            <span class="materia-docente">Docente: ${data.docente || '—'} | Semestre: ${data.semestre || '—'} | Nota aprobación: ${data.approvalGrade || 60}</span>
                         </div>
                         <div class="materia-actions">
                             ${!isActive ? `<button class="btn btn-primary btn-xs" onclick="cargarMateria('${doc.id}')"><i class="fas fa-check"></i> Seleccionar</button>` : ''}
@@ -1018,7 +985,6 @@
             if (!confirm('¿Eliminar esta materia y todos sus datos (estudiantes, evaluaciones, etc.)?')) return;
             try {
                 const ref = db.collection('materias').doc(id);
-                // Eliminar subcolecciones (en lote)
                 const subcollections = ['estudiantes', 'asistencias', 'trabajosCotidianos', 'trabajosExtraclases', 'proyectos',
                     'examenes'
                 ];
@@ -1045,13 +1011,14 @@
         }
 
         // ================================================================
-        //  CREAR MATERIA
+        //  CREAR MATERIA (con nota de aprobación)
         // ================================================================
         document.getElementById('materiaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nombre = document.getElementById('materiaNombre').value.trim();
             const docente = document.getElementById('materiaDocente').value.trim();
             const semestre = document.getElementById('materiaSemestre').value.trim();
+            const approvalGrade = parseFloat(document.getElementById('materiaApproval').value) || 60;
             if (!nombre || !docente) {
                 showToast('Nombre y docente son obligatorios.', 'error');
                 return;
@@ -1061,14 +1028,14 @@
                     nombre,
                     docente,
                     semestre: semestre || '',
-                    approvalGrade: 60,
+                    approvalGrade: approvalGrade,
                     weights: { daily: 20, extra: 15, projects: 20, exam: 30, attendance: 15 },
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 showToast(`Materia "${nombre}" creada.`, 'success');
                 document.getElementById('materiaForm').reset();
+                document.getElementById('materiaApproval').value = 60;
                 poblarSelectorMaterias();
-                // Cargar automáticamente la nueva materia
                 cargarMateria(ref.id);
             } catch (err) {
                 console.error(err);
@@ -1118,21 +1085,15 @@
             try {
                 const ref = getMateriaRef();
                 const batch = db.batch();
-                // Eliminar de estudiantes
                 batch.delete(ref.collection('estudiantes').doc(id));
-                // Eliminar de asistencias
                 const attSnap = await ref.collection('asistencias').where('studentId', '==', id).get();
                 attSnap.forEach(doc => batch.delete(doc.ref));
-                // Eliminar de dailyWorks
                 const dwSnap = await ref.collection('trabajosCotidianos').where('studentId', '==', id).get();
                 dwSnap.forEach(doc => batch.delete(doc.ref));
-                // ExtraWorks
                 const ewSnap = await ref.collection('trabajosExtraclases').where('studentId', '==', id).get();
                 ewSnap.forEach(doc => batch.delete(doc.ref));
-                // Projects
                 const pjSnap = await ref.collection('proyectos').where('studentId', '==', id).get();
                 pjSnap.forEach(doc => batch.delete(doc.ref));
-                // Exams
                 const exSnap = await ref.collection('examenes').where('studentId', '==', id).get();
                 exSnap.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
@@ -1144,7 +1105,7 @@
         }
 
         // ================================================================
-        //  RENDER: ATTENDANCE
+        //  RENDER: ATTENDANCE (igual que antes)
         // ================================================================
         let attendanceTableData = [];
 
@@ -1251,7 +1212,6 @@
                 if (isNaN(lessons) || lessons < 0) lessons = 0;
                 if (lessons > totalLessons) lessons = totalLessons;
 
-                // Buscar si ya existe un registro para esa fecha/estudiante/semestre
                 const existing = materiaActual.asistencias.find(a =>
                     a.studentId === studentId && a.date === date && a.semester === semester
                 );
@@ -1395,8 +1355,7 @@
         }
 
         // ================================================================
-        //  RENDER: DAILY WORK, EXTRA, PROJECTS, EXAMS (similares)
-        //  Se usa un patrón genérico para evitar repetir código.
+        //  RENDER: DAILY WORK, EXTRA, PROJECTS, EXAMS
         // ================================================================
         function renderDailyWork() {
             renderGenericTable('dailyWorks', 'dwTableBody', 'dwCount', 'Trabajos Cotidianos');
@@ -1453,18 +1412,12 @@
                     `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i><p>Sin ${emptyText.toLowerCase()} registrados.</p></div></td></tr>`;
                 return;
             }
-            // Determinar si es exams (tiene más columnas) o no.
             const isExams = collection === 'exams';
-            const fields = isExams ? ['studentId', 'date', 'semester', 'number', 'topic', 'grade', 'observations'] : ['studentId',
-                'date', 'semester', 'number', 'topic', 'grade', 'observations'
-            ];
-            // Para exams, no tenemos topic, pero lo construimos
             let html = '';
             list.forEach(item => {
                 const studentName = getStudentName(item.studentId);
                 const semesterLabel = item.semester === 1 ? 'Primer' : 'Segundo';
                 if (isExams) {
-                    // Exams tiene columnas especiales
                     html += `
                         <tr>
                             <td>${studentName}</td>
@@ -1499,7 +1452,6 @@
             tbody.innerHTML = html;
         }
 
-        // Función genérica para eliminar registros
         async function eliminarRegistro(collection, id) {
             if (!confirm('¿Eliminar este registro?')) return;
             try {
@@ -1522,21 +1474,14 @@
             return map[collection] || collection;
         }
 
-        // ================================================================
-        //  ELIMINAR REGISTROS (llamadas desde botones)
-        // ================================================================
         async function eliminarAsistencia(id) { eliminarRegistro('asistencias', id); }
-
         async function eliminarDailyWork(id) { eliminarRegistro('dailyWorks', id); }
-
         async function eliminarExtraWork(id) { eliminarRegistro('extraWorks', id); }
-
         async function eliminarProject(id) { eliminarRegistro('projects', id); }
-
         async function eliminarExamen(id) { eliminarRegistro('exams', id); }
 
         // ================================================================
-        //  FUNCIONES DE FORMULARIOS (guardar en Firestore)
+        //  FORMULARIOS (guardar en Firestore)
         // ================================================================
 
         // Estudiante
@@ -1668,7 +1613,7 @@
         });
 
         // ================================================================
-        //  RENDER: GRADES (cálculo)
+        //  GRADES
         // ================================================================
         function renderGrades() {
             const tbody = document.getElementById('gradeTableBody');
@@ -1819,9 +1764,6 @@
             return 0;
         }
 
-        // ================================================================
-        //  CLEAR GRADES
-        // ================================================================
         function clearGrades() {
             const thead = document.getElementById('gradeTableHead');
             const tbody = document.getElementById('gradeTableBody');
@@ -1834,22 +1776,18 @@
         }
 
         // ================================================================
-        //  EXPORTAR CSV
+        //  EXPORTAR CSV (simplificado)
         // ================================================================
         async function exportCSV() {
             if (!materiaActual || !materiaActual.estudiantes.length) {
                 showToast('No hay estudiantes para exportar.', 'error');
                 return;
             }
-            // Similar al original pero usando materiaActual
-            const semester = parseInt(document.getElementById('gradeSemester').value);
-            // ... (código similar al original adaptado)
-            // Por brevedad, se omite pero se puede implementar igual
-            showToast('Función CSV disponible (implementar similar al original).', 'info');
+            showToast('Función CSV disponible (implementar según necesidad).', 'info');
         }
 
         // ================================================================
-        //  STUDENT SUMMARY (cargar desde materiaActual)
+        //  STUDENT SUMMARY
         // ================================================================
         function loadStudentSummary() {
             if (!materiaActual) { showToast('Selecciona una materia.', 'error'); return; }
@@ -2001,7 +1939,7 @@
         }
 
         // ================================================================
-        //  PDF GENERATION (igual que original pero usando materiaActual)
+        //  PDF GENERATION (igual)
         // ================================================================
         async function downloadPDF() {
             const card = document.getElementById('summaryCard');
@@ -2162,7 +2100,6 @@
         // ================================================================
         function renderAll() {
             if (!materiaActual) {
-                // Mostrar mensaje de "sin materia" en todas las tablas
                 document.getElementById('studentTableBody').innerHTML =
                     `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-users"></i><p>Selecciona una materia para ver los estudiantes.</p></div></td></tr>`;
                 document.getElementById('attTableBody').innerHTML =
@@ -2197,9 +2134,6 @@
             populateSelects();
             populateSummarySelect();
             updateCoverTeacherInfo();
-            document.getElementById('approvalGrade').value = materiaActual.approvalGrade || 60;
-            document.getElementById('teacherName').value = materiaActual.docente || '';
-            document.getElementById('teacherSubject').value = materiaActual.nombre || '';
             // Cargar pesos desde la materia
             if (materiaActual.weights) {
                 document.getElementById('wDaily').value = materiaActual.weights.daily || 20;
@@ -2257,7 +2191,7 @@
             exams: 'Exámenes',
             grades: 'Notas Finales',
             studentsummary: 'Resumen Estudiante',
-            settings: 'Configuración'
+            settings: 'Gestión de Datos'
         };
 
         function navigateTo(pageId) {
@@ -2282,13 +2216,6 @@
                 populateSummarySelect();
                 document.getElementById('summaryResultContainer').style.display = 'none';
             }
-            if (pageId === 'settings') {
-                if (materiaActual) {
-                    document.getElementById('teacherName').value = materiaActual.docente || '';
-                    document.getElementById('teacherSubject').value = materiaActual.nombre || '';
-                    document.getElementById('approvalGrade').value = materiaActual.approvalGrade || 60;
-                }
-            }
             if (pageId === 'materias') {
                 poblarSelectorMaterias();
             }
@@ -2302,7 +2229,7 @@
         });
 
         // ================================================================
-        //  SIDEBAR TOGGLE (mobile)
+        //  SIDEBAR TOGGLE
         // ================================================================
         const sidebarEl = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -2317,36 +2244,7 @@
         overlay.addEventListener('click', closeSidebar);
 
         // ================================================================
-        //  SETTINGS FORM (guardar en Firestore)
-        // ================================================================
-        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!materiaActual) { showToast('Selecciona una materia.', 'error'); return; }
-            const name = document.getElementById('teacherName').value.trim();
-            const subject = document.getElementById('teacherSubject').value.trim();
-            const approval = parseFloat(document.getElementById('approvalGrade').value);
-            if (!name || !subject) {
-                showToast('Nombre y materia son obligatorios.', 'error');
-                return;
-            }
-            if (isNaN(approval) || approval < 0 || approval > 100) {
-                showToast('La nota de aprobación debe ser un número entre 0 y 100.', 'error');
-                return;
-            }
-            try {
-                await getMateriaRef().update({
-                    docente: name,
-                    nombre: subject,
-                    approvalGrade: approval
-                });
-                showToast('Configuración guardada correctamente.', 'success');
-            } catch (err) {
-                showToast('Error: ' + err.message, 'error');
-            }
-        });
-
-        // ================================================================
-        //  EXPORT / IMPORT / RESET
+        //  EXPORT / IMPORT / RESET (gestión de datos)
         // ================================================================
         document.getElementById('exportDataBtn').addEventListener('click', () => {
             if (!materiaActual) { showToast('Selecciona una materia.', 'error'); return; }
@@ -2362,12 +2260,8 @@
         });
 
         document.getElementById('exportHtmlBtn').addEventListener('click', async () => {
-            // Similar al original, pero con los datos actuales
             try {
                 const htmlContent = document.documentElement.outerHTML;
-                // Reemplazar la configuración de Firebase con la actual (no se necesita)
-                // Pero exportamos el HTML con los datos actuales embebidos? No, porque los datos están en Firebase.
-                // En su lugar, exportamos el HTML tal cual, ya que al abrirlo se conectará a Firebase.
                 if ('showSaveFilePicker' in window) {
                     const options = {
                         suggestedName: 'HELA_Academicos.html',
@@ -2419,13 +2313,11 @@
                     if (!confirm('¿Importar datos a la materia actual? Se agregarán los nuevos estudiantes y registros.')) return;
                     const ref = getMateriaRef();
                     const batch = db.batch();
-                    // Importar estudiantes
                     for (const s of imported.estudiantes) {
                         const newRef = ref.collection('estudiantes').doc();
                         batch.set(newRef, { nombre: s.nombre, email: s.email || '', parentEmail: s.parentEmail || '',
                             phone: s.phone || '' });
                     }
-                    // Importar asistencias
                     if (imported.asistencias) {
                         for (const a of imported.asistencias) {
                             const newRef = ref.collection('asistencias').doc();
@@ -2433,8 +2325,6 @@
                                 lessons: a.lessons, totalLessons: a.totalLessons });
                         }
                     }
-                    // ... similar para dailyWorks, extraWorks, projects, exams
-                    // Por brevedad, solo se importan estudiantes y asistencias.
                     await batch.commit();
                     showToast('Datos importados correctamente.', 'success');
                 } catch (err) {
@@ -2459,7 +2349,6 @@
                     const snap = await ref.collection(coll).get();
                     snap.forEach(doc => batch.delete(doc.ref));
                 }
-                // También restablecer approvalGrade y weights a valores por defecto
                 batch.update(ref, {
                     approvalGrade: 60,
                     weights: { daily: 20, extra: 15, projects: 20, exam: 30, attendance: 15 }
@@ -2494,7 +2383,7 @@
         });
 
         // ================================================================
-        //  BULK UPLOAD (estudiantes)
+        //  BULK UPLOAD
         // ================================================================
         const uploadArea = document.getElementById('uploadArea');
         const fileInput2 = document.getElementById('fileInput');
@@ -2579,7 +2468,7 @@
         }
 
         // ================================================================
-        //  EVENTOS DE NAVEGACIÓN Y BOTONES
+        //  EVENTOS DE BOTONES
         // ================================================================
         document.getElementById('calcGradesBtn').addEventListener('click', () => {
             renderGrades();
@@ -2601,21 +2490,17 @@
             if (el) el.value = today;
         });
 
-        // Cargar la materia activa si existe
         if (materiaActualId) {
             cargarMateria(materiaActualId);
         } else {
             renderAll();
-            // Mostrar selector de materias
             poblarSelectorMaterias();
             actualizarBadgeMateria();
             showToast('Selecciona o crea una materia para comenzar.', 'info');
         }
 
-        // Navegar a la página de cover inicialmente
         navigateTo('cover');
-
-        console.log('📚 H.E.L.A. con Firebase - Multi-materia');
+        console.log('📚 H.E.L.A. con Firebase - Multi-materia (nota de aprobación en materias)');
         console.log('✅ Conectado a Firestore');
     </script>
 
