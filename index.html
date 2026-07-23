@@ -140,7 +140,15 @@
         .summary-grid .stat .value { font-size:22px; font-weight:700; color:#0f172a; }
         .help-text { font-size:12px; color:#64748b; margin-top:2px; display:block; }
         .csv-btn { margin-left:8px; }
-        /* Responsive (original) */
+        /* Modal de edición */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:#fff; border-radius:var(--radius); padding:30px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .modal-box .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .modal-box .modal-header h3 { font-size:20px; color:#0f172a; }
+        .modal-box .modal-close { background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; }
+        .modal-box .modal-close:hover { color:#0f172a; }
+        /* Responsive */
         @media (max-width:768px) {
             .sidebar { position:fixed; transform:translateX(-100%); width:280px; height:100vh; top:0; left:0; box-shadow:4px 0 24px rgba(0,0,0,0.2); }
             .sidebar.open { transform:translateX(0); }
@@ -172,6 +180,7 @@
             .card-header { flex-direction:column; align-items:stretch; }
             .card-header .badge { align-self:flex-start; }
             .cover .corner-logo { width:48px; height:48px; top:8px; right:8px; border-radius:10px; }
+            .modal-box { padding:20px; }
         }
         /* TOAST */
         .toast-container { position:fixed; bottom:24px; right:24px; z-index:999; display:flex; flex-direction:column; gap:10px; max-width:360px; width:100%; }
@@ -758,6 +767,39 @@
     <!-- ===== TOAST CONTAINER ===== -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- ===== MODAL DE EDICIÓN DE ESTUDIANTE ===== -->
+    <div class="modal-overlay" id="editStudentModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Editar Estudiante</h3>
+                <button class="modal-close" id="closeEditModal">&times;</button>
+            </div>
+            <form id="editStudentForm">
+                <input type="hidden" id="editStudentId" />
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Nombre completo <span class="required">*</span></label>
+                    <input class="form-control" id="editName" required />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Correo electrónico <span class="required">*</span></label>
+                    <input class="form-control" id="editEmail" type="email" required />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Correo del padre/tutor</label>
+                    <input class="form-control" id="editParentEmail" type="email" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Teléfono</label>
+                    <input class="form-control" id="editPhone" />
+                </div>
+                <div class="form-actions" style="border-top:none; padding-top:0; margin-top:8px;">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
+                    <button type="button" class="btn btn-outline" id="cancelEditModal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ================================================================
         //  FIREBASE CONFIGURACIÓN (REEMPLAZA CON TUS CREDENCIALES)
@@ -808,15 +850,71 @@
             return s ? s.nombre : '(eliminado)';
         }
 
+        // Devuelve los estudiantes ordenados alfabéticamente por nombre
+        function getSortedStudents() {
+            if (!materiaActual || !materiaActual.estudiantes) return [];
+            return [...materiaActual.estudiantes].sort((a, b) => a.nombre.localeCompare(b.nombre));
+        }
+
         function getStudentOptions() {
-            if (!materiaActual || !materiaActual.estudiantes) return '';
-            return materiaActual.estudiantes.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+            const sorted = getSortedStudents();
+            return sorted.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
         }
 
         function getMateriaRef() {
             if (!materiaActualId) throw new Error('No hay materia seleccionada');
             return db.collection('materias').doc(materiaActualId);
         }
+
+        // ================================================================
+        //  MODAL DE EDICIÓN
+        // ================================================================
+        function editarEstudiante(id) {
+            const student = materiaActual.estudiantes.find(s => s.id === id);
+            if (!student) { showToast('Estudiante no encontrado.', 'error'); return; }
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('editName').value = student.nombre || '';
+            document.getElementById('editEmail').value = student.email || '';
+            document.getElementById('editParentEmail').value = student.parentEmail || '';
+            document.getElementById('editPhone').value = student.phone || '';
+            document.getElementById('editStudentModal').classList.add('active');
+        }
+
+        function cerrarModalEdicion() {
+            document.getElementById('editStudentModal').classList.remove('active');
+        }
+
+        document.getElementById('closeEditModal').addEventListener('click', cerrarModalEdicion);
+        document.getElementById('cancelEditModal').addEventListener('click', cerrarModalEdicion);
+        // Cerrar al hacer clic fuera del modal
+        document.getElementById('editStudentModal').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModalEdicion();
+        });
+
+        document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editStudentId').value;
+            const nombre = document.getElementById('editName').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const parentEmail = document.getElementById('editParentEmail').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            if (!nombre || !email) {
+                showToast('Nombre y correo son obligatorios.', 'error');
+                return;
+            }
+            try {
+                await getMateriaRef().collection('estudiantes').doc(id).update({
+                    nombre,
+                    email,
+                    parentEmail: parentEmail || '',
+                    phone: phone || ''
+                });
+                cerrarModalEdicion();
+                showToast('Estudiante actualizado correctamente.', 'success');
+            } catch (err) {
+                showToast('Error al actualizar: ' + err.message, 'error');
+            }
+        });
 
         // ================================================================
         //  CARGAR MATERIA Y SUBCOLECCIONES
@@ -1011,7 +1109,7 @@
         }
 
         // ================================================================
-        //  CREAR MATERIA (con nota de aprobación)
+        //  CREAR MATERIA
         // ================================================================
         document.getElementById('materiaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1054,19 +1152,19 @@
         });
 
         // ================================================================
-        //  RENDER: STUDENTS
+        //  RENDER: STUDENTS (con orden alfabético y botón Editar)
         // ================================================================
         function renderStudents() {
             const tbody = document.getElementById('studentTableBody');
             const count = document.getElementById('studentCount');
-            const list = materiaActual ? materiaActual.estudiantes : [];
-            count.textContent = `${list.length} registrados`;
-            if (!list.length) {
+            const sorted = getSortedStudents();
+            count.textContent = `${sorted.length} registrados`;
+            if (!sorted.length) {
                 tbody.innerHTML =
                     `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-users"></i><p>No hay estudiantes registrados.</p></div></td></tr>`;
                 return;
             }
-            tbody.innerHTML = list.map((s, i) => `
+            tbody.innerHTML = sorted.map((s, i) => `
                 <tr>
                     <td>${i+1}</td>
                     <td><strong>${s.nombre}</strong></td>
@@ -1074,6 +1172,7 @@
                     <td>${s.parentEmail || '—'}</td>
                     <td>${s.phone || '—'}</td>
                     <td class="actions-cell">
+                        <button class="btn btn-primary btn-xs" onclick="editarEstudiante('${s.id}')"><i class="fas fa-edit"></i> Editar</button>
                         <button class="btn btn-danger btn-xs" onclick="eliminarEstudiante('${s.id}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
@@ -1105,14 +1204,14 @@
         }
 
         // ================================================================
-        //  RENDER: ATTENDANCE (igual que antes)
+        //  RENDER: ATTENDANCE (con orden alfabético)
         // ================================================================
         let attendanceTableData = [];
 
         function renderAttendanceTable() {
             const tbody = document.getElementById('attTableBody');
-            const students = materiaActual ? materiaActual.estudiantes : [];
-            if (!students.length) {
+            const sorted = getSortedStudents();
+            if (!sorted.length) {
                 tbody.innerHTML =
                     `<tr><td colspan="4"><div class="empty-state"><i class="fas fa-users"></i><p>No hay estudiantes registrados. Agrega estudiantes primero.</p></div></td></tr>`;
                 return;
@@ -1126,7 +1225,7 @@
             const existing = materiaActual.asistencias.filter(a => a.date === date && a.semester === semester);
 
             let html = '';
-            students.forEach((s, idx) => {
+            sorted.forEach((s, idx) => {
                 const record = existing.find(a => a.studentId === s.id);
                 const lessons = record ? record.lessons : 0;
                 attendanceTableData.push({ studentId: s.id, lessons: lessons });
@@ -1279,13 +1378,13 @@
 
         function renderAttendanceSummary() {
             const semester = parseInt(document.getElementById('attSemester').value);
-            const students = materiaActual ? materiaActual.estudiantes : [];
+            const sorted = getSortedStudents();
             const tbody = document.getElementById('summaryTableBody');
             const badge = document.getElementById('summarySemesterBadge');
             badge.textContent = semester === 1 ? 'Semestre 1' : 'Semestre 2';
 
             const allAtts = materiaActual ? materiaActual.asistencias.filter(a => a.semester === semester) : [];
-            if (!students.length || !allAtts.length) {
+            if (!sorted.length || !allAtts.length) {
                 tbody.innerHTML =
                     `<tr><td colspan="4"><div class="empty-state"><i class="fas fa-chart-simple"></i><p>No hay datos de asistencia para este semestre.</p></div></td></tr>`;
                 document.getElementById('totalLessonsGiven').textContent = '0';
@@ -1309,10 +1408,10 @@
                 totalPresentGlobal += a.lessons || 0;
             });
 
-            const avgOverall = totalLessonsGlobal > 0 ? (totalPresentGlobal / (totalLessonsGlobal * students.length)) * 100 : 0;
+            const avgOverall = totalLessonsGlobal > 0 ? (totalPresentGlobal / (totalLessonsGlobal * sorted.length)) * 100 : 0;
 
             let summary = [];
-            students.forEach(s => {
+            sorted.forEach(s => {
                 const studentAtts = allAtts.filter(a => a.studentId === s.id);
                 if (!studentAtts.length) return;
                 let totalGiven = 0,
@@ -1329,8 +1428,6 @@
                     percent
                 });
             });
-
-            summary.sort((a, b) => a.name.localeCompare(b.name));
 
             if (!summary.length) {
                 tbody.innerHTML =
@@ -1355,7 +1452,7 @@
         }
 
         // ================================================================
-        //  RENDER: DAILY WORK, EXTRA, PROJECTS, EXAMS
+        //  RENDER: DAILY WORK, EXTRA, PROJECTS, EXAMS (no requieren orden)
         // ================================================================
         function renderDailyWork() {
             renderGenericTable('dailyWorks', 'dwTableBody', 'dwCount', 'Trabajos Cotidianos');
@@ -1619,7 +1716,8 @@
             const tbody = document.getElementById('gradeTableBody');
             const thead = document.getElementById('gradeTableHead');
             const count = document.getElementById('gradeCount');
-            if (!materiaActual || !materiaActual.estudiantes.length) {
+            const sorted = getSortedStudents();
+            if (!sorted.length) {
                 thead.innerHTML = '';
                 tbody.innerHTML =
                     `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-chart-simple"></i><p>No hay estudiantes para calcular.</p></div></td></tr>`;
@@ -1668,7 +1766,7 @@
             thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
 
             let rows = [];
-            for (const s of materiaActual.estudiantes) {
+            for (const s of sorted) {
                 const dws = materiaActual.dailyWorks.filter(d => d.studentId === s.id && d.semester === semester);
                 const ews = materiaActual.extraWorks.filter(e => e.studentId === s.id && e.semester === semester);
                 const prs = materiaActual.projects.filter(p => p.studentId === s.id && p.semester === semester);
@@ -2134,7 +2232,6 @@
             populateSelects();
             populateSummarySelect();
             updateCoverTeacherInfo();
-            // Cargar pesos desde la materia
             if (materiaActual.weights) {
                 document.getElementById('wDaily').value = materiaActual.weights.daily || 20;
                 document.getElementById('wExtra').value = materiaActual.weights.extra || 15;
@@ -2500,7 +2597,7 @@
         }
 
         navigateTo('cover');
-        console.log('📚 H.E.L.A. con Firebase - Multi-materia (nota de aprobación en materias)');
+        console.log('📚 H.E.L.A. con Firebase - Multi-materia (orden alfabético + edición estudiantes)');
         console.log('✅ Conectado a Firestore');
     </script>
 
