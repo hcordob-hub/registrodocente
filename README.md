@@ -3,3 +3,4 @@ Mejoras del sistema:
 - Habilitar edición individual en todas las evaluaciones
 - Agregar un apartado para ver que días se han dado clases para verificar que días se paso asistencia
 - Agregar clave para el sistema
+- Mostrar informción de los estudiantes en la pestaña
